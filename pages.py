@@ -1,5 +1,3 @@
-from html.parser import commentclose
-
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -29,7 +27,7 @@ class UrbanRoutesPage:
     payment_method_select = (By.CSS_SELECTOR, '.pp-button.filled')
     add_card_control = (By.XPATH, '//div[contains(text(), "Adicionar cartão")]')
     card_number_input = (By.ID, 'number')
-    #card_code_input = (By.CSS_SELECTOR, 'input.card-input#code')
+    card_code_input = (By.CSS_SELECTOR, 'input.card-input#code')
     card_credentials_confirm_button = (By.XPATH, '//button[contains(text(), "Link")]')
     close_button_payment_method = (By.CSS_SELECTOR, '.payment-picker.open .close-button')
     current_payment_method = (By.CSS_SELECTOR, '.pp-value-text')
@@ -43,25 +41,39 @@ class UrbanRoutesPage:
     # Pedido
     order_car_button = (By.CSS_SELECTOR, '.smart-button-wrapper')
     order_popup = (By.CSS_SELECTOR, '.order-body')
-    #loader = (By.CSS_SELECTOR, '.loader')
+    loader = (By.CSS_SELECTOR, '.loader')
 
     def __init__(self, driver):
         self.driver = driver
 
-    def set_from(self, from_adress):
-        from_field = WebDriverWait(self.driver, 3).until(expected_conditions.visibility_of_element_located(self.from_field))
-        from_field.send_keys(from_adress)
+    def wait_for_loader_to_disappear(self, timeout=10):
+        try:
+            WebDriverWait(self.driver, timeout).until(
+                EC.invisibility_of_element_located(self.loader))
+        except:
+            pass
 
-    def set_to(self, to_adress):
-        field = WebDriverWait(self.driver, timeout=15).until(EC.element_to_be_clickable(self.to_field))
+    def set_from(self, from_adress):
+        field = WebDriverWait(self.driver, 15).until(
+            EC.element_to_be_clickable(self.from_field))
         field.clear()
-        field.send_keys(to_adress)
+        field.send_keys(from_adress)
+        time.sleep(0.3)
 
     def get_from(self):
-        return self.driver.find_element(*self.from_field).get_property('value')
+        return WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located(self.from_field)).get_property('value')
+
+    def set_to(self, to_adress):
+        field = WebDriverWait(self.driver, timeout=15).until(
+            EC.element_to_be_clickable(self.to_field))
+        field.clear()
+        field.send_keys(to_adress)
+        time.sleep(0.3)
 
     def get_to(self):
-        return self.driver.find_element(*self.to_field).get_property('value')
+        return WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located(self.to_field)).get_property('value')
 
     def click_call_taxi_button(self):
         self.wait_for_loader_to_disappear()
@@ -93,7 +105,7 @@ class UrbanRoutesPage:
             time.sleep(1)
 
             WebDriverWait(self.driver, timeout=5).until(
-                lambda d: "active" in comfort_element.find_elemente(By.XPATH, value= "./..").get_attribute("class"))
+                lambda d: "active" in comfort_element.find_element(By.XPATH, value= "./..").get_attribute("class"))
 
         except Exception as e:
             print(f"Erro ao selecionar plano Confort: {str(e)}")
@@ -262,7 +274,7 @@ class UrbanRoutesPage:
     def add_ice_cream(self, amount):
         self.wait_for_loader_to_disappear()
         add_buttons = WebDriverWait(self.driver, timeout=10).until(
-            EC.presence_of_all_element_located(self.add_enumerable_option))
+            EC.presence_of_all_elements_located(self.add_enumerable_option))
         self.driver.execute_script("arguments[0].scrollIntoView();", add_buttons[0])
         for _ in range(amount):
             add_buttons[0].click()
@@ -275,7 +287,7 @@ class UrbanRoutesPage:
         return int(elements[0].text.strip())
 
     def click_order_taxi_button(self):
-        self.wait_for_loader_disappear()
+        self.wait_for_loader_to_disappear()
         button = WebDriverWait(self.driver, timeout=15).until(
             EC.element_to_be_clickable(self.order_car_button))
         self.driver.execute_script("arguments[0].click();", button)
@@ -283,7 +295,7 @@ class UrbanRoutesPage:
 
     def is_order_taxi_popup(self):
         try:
-            self.wait_for_loader_disappear()
+            self.wait_for_loader_to_disappear()
             time.sleep(2)
             popup_selectors = [
                 (By.CSS_SELECTOR, '.order-popup, .confirmation-modal, .order-body'),

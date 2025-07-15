@@ -68,7 +68,7 @@ class TestUrbanRoutes:
         routes_page.set_route(data.ADDRESS_FROM, data.ADDRESS_TO)
         message = data.MESSAGE_FOR_DRIVER
         routes_page.set_message_for_driver(message)
-        assert routes_page.set_message_for_driver() == message
+        assert routes_page.get_message_for_driver() == message
         #print("função criada para comentar para o motorista")
         #pass
 
@@ -96,9 +96,9 @@ class TestUrbanRoutes:
         #     # Adicionar em S8
         #     pass
 
-    def test_car_search_model_appears(self):
-        # Adicionar em S8
-        print("função criada para verificar se o modelo do carro aparece")
+    # def test_car_search_model_appears(self):
+    #     # Adicionar em S8
+    #     print("função criada para verificar se o modelo do carro aparece")
 
     @classmethod
     def teardown_class(cls):
